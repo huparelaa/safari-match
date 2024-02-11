@@ -43,7 +43,7 @@ public class Board : MonoBehaviour
                 var o = Instantiate(tileObject, new Vector3(x, y, -5), Quaternion.identity);
                 o.transform.parent = transform;
                 Tiles[x, y] = o.GetComponent<Tile>();
-                Tiles[x, y]?.Setup(x, y, this);
+                Tiles[x, y].Setup(x, y, this);
             }
         }
     }
@@ -167,6 +167,32 @@ public class Board : MonoBehaviour
         });
         List<int> columns = GetColumns(piecesToClear);
         List<Piece> collapsedPieces = CollapseColumns(columns, 0.3f);
+        FindMatchRecursive(collapsedPieces);
+    }
+
+    private void FindMatchRecursive(List<Piece> collapsedPieces)
+    {
+        StartCoroutine(FindMatchRecursiveCoroutine(collapsedPieces));
+    }
+
+    IEnumerator FindMatchRecursiveCoroutine(List<Piece> collapsedPieces)
+    {
+        yield return new WaitForSeconds(1f);
+        List<Piece> newMatches = new List<Piece>();
+        collapsedPieces.ForEach(piece=>{
+            var matches = GetMatchByPiece(piece.x, piece.y, 3);
+            if(matches != null)
+            {
+                newMatches = newMatches.Union(matches).ToList();
+                ClearPieces(matches);
+            }
+        });
+        if(newMatches.Count > 0)
+        {
+            var newCollapsedPieces = CollapseColumns(GetColumns(newMatches), 0.3f);
+            FindMatchRecursive(newCollapsedPieces);
+        }
+        yield return null;
     }
 
     private List<int> GetColumns(List<Piece> piecesToClear)
