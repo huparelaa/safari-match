@@ -50,17 +50,40 @@ public class Board : MonoBehaviour
 
     private void SetupPieces()
     {
+        var maxIterations = 50;
+        var currentIterations = 0;
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                var selectedPiece = availablePieces[UnityEngine.Random.Range(0, availablePieces.Length)];
-                var o = Instantiate(selectedPiece, new Vector3(x, y, -5), Quaternion.identity);
-                o.transform.parent = transform;
-                Pieces[x, y] = o.GetComponent<Piece>();
-                Pieces[x, y]?.Setup(x, y, this);
+                currentIterations = 0;
+                var newPiece = CreatePieceAt(x, y);
+                while(HasPreviousMatches(x, y)){
+                    ClearPieceAt(x, y);
+                    newPiece = CreatePieceAt(x, y);
+                    currentIterations++;
+                    if(currentIterations > maxIterations){
+                        break;
+                    }
+                }
             }
         }
+    }
+
+    private void ClearPieceAt(int x, int y)
+    {
+        var pieceToClear = Pieces[x, y];
+        Destroy(pieceToClear.gameObject);
+        Pieces[x, y] = null;
+    }
+    private Piece CreatePieceAt(int x, int y)
+    {
+        var selectedPiece = availablePieces[UnityEngine.Random.Range(0, availablePieces.Length)];
+        var o = Instantiate(selectedPiece, new Vector3(x, y, -5), Quaternion.identity);
+        o.transform.parent = transform;
+        Pieces[x, y] = o.GetComponent<Piece>();
+        Pieces[x, y]?.Setup(x, y, this);
+        return Pieces[x, y];
     }
 
     private void PositionCamera()
@@ -88,7 +111,7 @@ public class Board : MonoBehaviour
 
     public void TileUp(Tile tile_)
     {
-        if (startTile != null && endTile != null && IsCloseTo(startTile, endTile))
+        if (startTile != null && endTile != null && IsCloseTo(startTile, endTile) && !swapping)
         {
             StartCoroutine(SwapTiles(startTile, endTile));
         }
@@ -114,18 +137,19 @@ public class Board : MonoBehaviour
         var startMatches = GetMatchByPiece(startTile.x, startTile.y, 3);
         var endMatches = GetMatchByPiece(endTile.x, endTile.y, 3);
 
-        startMatches.ForEach(piece => {
+        startMatches.ForEach(piece =>
+        {
             isMatch = true;
-            Pieces[piece.x, piece.y] = null;
-            Destroy(piece.gameObject);
+            ClearPieceAt(piece.x, piece.y);            
         });
 
-        endMatches.ForEach(piece => {
+        endMatches.ForEach(piece =>
+        {
             isMatch = true;
-            Pieces[piece.x, piece.y] = null;
-            Destroy(piece.gameObject);
+            ClearPieceAt(piece.x, piece.y);
         });
-        if (!isMatch){
+        if (!isMatch)
+        {
             startPiece.Move(startTile.x, startTile.y);
             endPiece.Move(endTile.x, endTile.y);
             Pieces[startTile.x, startTile.y] = startPiece;
@@ -218,7 +242,17 @@ public class Board : MonoBehaviour
         }
 
         return foundMatches;
-
-
     }
+
+    private bool HasPreviousMatches(int xPos, int yPos)
+    {
+        var downMatchs = GetMatchByDirection(xPos, yPos, new Vector2(0, -1), 2);
+        var leftMatchs = GetMatchByDirection(xPos, yPos, new Vector2(-1, 0), 2);
+
+        if (downMatchs == null) downMatchs = new List<Piece>();
+        if (leftMatchs == null) leftMatchs = new List<Piece>();
+
+        return downMatchs.Count > 0 || leftMatchs.Count > 0;
+    }
+
 }
