@@ -58,11 +58,13 @@ public class Board : MonoBehaviour
             {
                 currentIterations = 0;
                 var newPiece = CreatePieceAt(x, y);
-                while(HasPreviousMatches(x, y)){
+                while (HasPreviousMatches(x, y))
+                {
                     ClearPieceAt(x, y);
                     newPiece = CreatePieceAt(x, y);
                     currentIterations++;
-                    if(currentIterations > maxIterations){
+                    if (currentIterations > maxIterations)
+                    {
                         break;
                     }
                 }
@@ -133,27 +135,21 @@ public class Board : MonoBehaviour
 
         yield return new WaitForSeconds(0.6f);
 
-        bool isMatch = false;
         var startMatches = GetMatchByPiece(startTile.x, startTile.y, 3);
         var endMatches = GetMatchByPiece(endTile.x, endTile.y, 3);
 
-        startMatches.ForEach(piece =>
-        {
-            isMatch = true;
-            ClearPieceAt(piece.x, piece.y);            
-        });
+        var allMatches = startMatches.Union(endMatches).ToList();
 
-        endMatches.ForEach(piece =>
-        {
-            isMatch = true;
-            ClearPieceAt(piece.x, piece.y);
-        });
-        if (!isMatch)
+        if (allMatches.Count == 0)
         {
             startPiece.Move(startTile.x, startTile.y);
             endPiece.Move(endTile.x, endTile.y);
             Pieces[startTile.x, startTile.y] = startPiece;
             Pieces[endTile.x, endTile.y] = endPiece;
+        }
+        else
+        {
+            ClearPieces(allMatches);
         }
 
         startTile = null;
@@ -161,6 +157,60 @@ public class Board : MonoBehaviour
         swapping = false;
 
         yield return null;
+    }
+
+    private void ClearPieces(List<Piece> piecesToClear)
+    {
+        piecesToClear.ForEach(p =>
+        {
+            ClearPieceAt(p.x, p.y);
+        });
+        List<int> columns = GetColumns(piecesToClear);
+        List<Piece> collapsedPieces = CollapseColumns(columns, 0.3f);
+    }
+
+    private List<int> GetColumns(List<Piece> piecesToClear)
+    {
+        var result = new List<int>();
+        piecesToClear.ForEach(p =>
+        {
+            if (!result.Contains(p.x))
+            {
+                result.Add(p.x);
+            }
+        });
+        return result;
+    }
+
+    private List<Piece> CollapseColumns(List<int> columns, float timeToCollapse)
+    {
+        List<Piece> movingPieces = new List<Piece>();
+
+        for (int i = 0; i < columns.Count; i++)
+        {
+            var column = columns[i];
+            for (int y = 0; y < height; y++)
+            {
+                if (Pieces[column, y] == null)
+                {
+                    for (int y2 = y + 1; y2 < height; y2++)
+                    {
+                        if (Pieces[column, y2] != null)
+                        {
+                            Pieces[column, y2].Move(column, y);
+                            Pieces[column, y] = Pieces[column, y2];
+                            if (!movingPieces.Contains(Pieces[column, y]))
+                            {
+                                movingPieces.Add(Pieces[column, y]);
+                            }
+                            Pieces[column, y2] = null;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return movingPieces;
     }
 
     public bool IsCloseTo(Tile startTile, Tile endTile)
