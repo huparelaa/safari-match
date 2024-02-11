@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Board : MonoBehaviour
 {
@@ -14,9 +15,17 @@ public class Board : MonoBehaviour
 
     public GameObject[] availablePieces;
 
+    Tile[,] Tiles; //<-- 2D array of tiles
+    Piece[,] Pieces; //<-- 2D array of pieces
+
+    Tile startTile;
+    Tile endTile;
+
     // Start is called before the first frame update
     void Start()
     {
+        Tiles = new Tile[width, height];
+        Pieces = new Piece[width, height];
         SetupBoard();
         PositionCamera();
         SetupPieces();
@@ -30,7 +39,8 @@ public class Board : MonoBehaviour
             {
                 var o = Instantiate(tileObject, new Vector3(x, y, -5), Quaternion.identity);
                 o.transform.parent = transform;
-                o.GetComponent<Tile>()?.Setup(x, y, this);
+                Tiles[x, y] = o.GetComponent<Tile>();
+                Tiles[x, y]?.Setup(x, y, this);
             }
         }
     }
@@ -44,7 +54,8 @@ public class Board : MonoBehaviour
                 var selectedPiece = availablePieces[UnityEngine.Random.Range(0, availablePieces.Length)];
                 var o = Instantiate(selectedPiece, new Vector3(x, y, -5), Quaternion.identity);
                 o.transform.parent = transform;
-                o.GetComponent<Piece>()?.Setup(x, y, this);
+                Pieces[x, y] = o.GetComponent<Piece>();
+                Pieces[x, y]?.Setup(x, y, this);
             }
         }
     }
@@ -62,9 +73,51 @@ public class Board : MonoBehaviour
         Camera.main.orthographicSize = (horizontal > vertical) ? horizontal + CameraSizeOffset : vertical + CameraSizeOffset;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void TileDown(Tile tile_)
     {
+        startTile = tile_;
+    }
 
+    public void TileOver(Tile tile_)
+    {
+        endTile = tile_;
+    }
+
+    public void TileUp(Tile tile_)
+    {
+        if (startTile != null && endTile != null && IsCloseTo(startTile, endTile))
+        {
+            SwapTiles(startTile, endTile);
+        }
+        startTile = null;
+        endTile = null;
+    }
+
+    private void SwapTiles(Tile startTile, Tile endTile)
+    {
+        var startPiece = Pieces[startTile.x, startTile.y];
+        var endPiece = Pieces[endTile.x, endTile.y];
+
+        startPiece.Move(endTile.x, endTile.y);
+        endPiece.Move(startTile.x, startTile.y);
+
+        Pieces[startTile.x, startTile.y] = endPiece;
+        Pieces[endTile.x, endTile.y] = startPiece;
+    }
+
+    public bool IsCloseTo(Tile startTile, Tile endTile)
+    {
+        // Verificar si las casillas están una al lado de la otra en el eje x
+        if (Math.Abs((startTile.x - endTile.x)) == 1 && startTile.y == endTile.y)
+        {
+            return true;
+        }
+
+        // Verificar si las casillas están una al lado de la otra en el eje y
+        if (Math.Abs((startTile.y - endTile.y)) == 1 && startTile.x == endTile.x)
+        {
+            return true;
+        }
+        return false;
     }
 }
