@@ -22,6 +22,8 @@ public class Board : MonoBehaviour
     Tile startTile;
     Tile endTile;
 
+    bool swapping;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -88,14 +90,15 @@ public class Board : MonoBehaviour
     {
         if (startTile != null && endTile != null && IsCloseTo(startTile, endTile))
         {
-            SwapTiles(startTile, endTile);
+            StartCoroutine(SwapTiles(startTile, endTile));
         }
         startTile = null;
         endTile = null;
     }
 
-    private void SwapTiles(Tile startTile, Tile endTile)
+    IEnumerator SwapTiles(Tile startTile, Tile endTile)
     {
+        swapping = true;
         var startPiece = Pieces[startTile.x, startTile.y];
         var endPiece = Pieces[endTile.x, endTile.y];
 
@@ -104,6 +107,36 @@ public class Board : MonoBehaviour
 
         Pieces[startTile.x, startTile.y] = endPiece;
         Pieces[endTile.x, endTile.y] = startPiece;
+
+        yield return new WaitForSeconds(0.6f);
+
+        bool isMatch = false;
+        var startMatches = GetMatchByPiece(startTile.x, startTile.y, 3);
+        var endMatches = GetMatchByPiece(endTile.x, endTile.y, 3);
+
+        startMatches.ForEach(piece => {
+            isMatch = true;
+            Pieces[piece.x, piece.y] = null;
+            Destroy(piece.gameObject);
+        });
+
+        endMatches.ForEach(piece => {
+            isMatch = true;
+            Pieces[piece.x, piece.y] = null;
+            Destroy(piece.gameObject);
+        });
+        if (!isMatch){
+            startPiece.Move(startTile.x, startTile.y);
+            endPiece.Move(endTile.x, endTile.y);
+            Pieces[startTile.x, startTile.y] = startPiece;
+            Pieces[endTile.x, endTile.y] = endPiece;
+        }
+
+        startTile = null;
+        endTile = null;
+        swapping = false;
+
+        yield return null;
     }
 
     public bool IsCloseTo(Tile startTile, Tile endTile)
