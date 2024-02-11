@@ -371,11 +371,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 562a7f1752911fb48b2772d7c7191e37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeBetweenPieces: 0.05
   width: 6
   height: 11
   tileObject: {fileID: 128856442649444054, guid: 8d0c8b5ea8c69064fb954ee5caddf963, type: 3}
   CameraSizeOffset: 0
   CameraVerticalOffset: 0
+  availablePieces:
+  - {fileID: 4756710662399285536, guid: 1338b5e35d6ee5b4badfe978410b46f1, type: 3}
+  - {fileID: 5584170369645538097, guid: c2665d878db974749a177766c3cea6ed, type: 3}
+  - {fileID: 4962342885429986672, guid: dde99132a07f0384083521b7e430a8b9, type: 3}
+  - {fileID: 5235487726568950791, guid: 4fe913e5f94084b4f988524d317425c5, type: 3}
+  - {fileID: 8527862824281355734, guid: e660191a371f4cc4b86b3cd752d71f46, type: 3}
+  - {fileID: 7143475316244935762, guid: e9d006eaf9fb1fc43a19229273ef6a87, type: 3}
 --- !u!4 &1198995706
 Transform:
   m_ObjectHideFlags: 0

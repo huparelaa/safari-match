@@ -80,16 +80,17 @@ public class Board : MonoBehaviour
     private void ClearPieceAt(int x, int y)
     {
         var pieceToClear = Pieces[x, y];
-        Destroy(pieceToClear.gameObject);
+        pieceToClear.Remove(true);
         Pieces[x, y] = null;
     }
     private Piece CreatePieceAt(int x, int y)
     {
         var selectedPiece = availablePieces[UnityEngine.Random.Range(0, availablePieces.Length)];
-        var o = Instantiate(selectedPiece, new Vector3(x, y, -5), Quaternion.identity);
+        var o = Instantiate(selectedPiece, new Vector3(x, y + 1, -5), Quaternion.identity);
         o.transform.parent = transform;
         Pieces[x, y] = o.GetComponent<Piece>();
-        Pieces[x, y]?.Setup(x, y, this);
+        Pieces[x, y].Setup(x, y, this);
+        Pieces[x, y].Move(x, y);
         return Pieces[x, y];
     }
 
@@ -147,7 +148,11 @@ public class Board : MonoBehaviour
         var endMatches = GetMatchByPiece(endTile.x, endTile.y, 3);
 
         var allMatches = startMatches.Union(endMatches).ToList();
-
+        //log all matches
+        allMatches.ForEach(p =>
+        {
+            Debug.Log(p.x + " " + p.y);
+        });
         if (allMatches.Count == 0)
         {
             startPiece.Move(startTile.x, startTile.y);
