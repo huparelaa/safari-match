@@ -6,6 +6,8 @@ using System.Linq;
 
 public class Board : MonoBehaviour
 {
+    public float timeBetweenPieces = 0.01f;
+
     public int width;
     public int height;
 
@@ -31,7 +33,7 @@ public class Board : MonoBehaviour
         Pieces = new Piece[width, height];
         SetupBoard();
         PositionCamera();
-        SetupPieces();
+        StartCoroutine(SetupPieces());
     }
 
     private void SetupBoard()
@@ -48,7 +50,7 @@ public class Board : MonoBehaviour
         }
     }
 
-    private void SetupPieces()
+    IEnumerator SetupPieces()
     {
         var maxIterations = 50;
         var currentIterations = 0;
@@ -56,6 +58,8 @@ public class Board : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
+                yield return new WaitForSeconds(timeBetweenPieces);
+                if (Pieces[x, y] != null) continue;
                 currentIterations = 0;
                 var newPiece = CreatePieceAt(x, y);
                 while (HasPreviousMatches(x, y))
@@ -70,6 +74,7 @@ public class Board : MonoBehaviour
                 }
             }
         }
+        yield return null;
     }
 
     private void ClearPieceAt(int x, int y)
@@ -103,22 +108,25 @@ public class Board : MonoBehaviour
 
     public void TileDown(Tile tile_)
     {
-        startTile = tile_;
+        if (!swapping) startTile = tile_;
     }
 
     public void TileOver(Tile tile_)
     {
-        endTile = tile_;
+        if (!swapping) endTile = tile_;
     }
 
     public void TileUp(Tile tile_)
     {
-        if (startTile != null && endTile != null && IsCloseTo(startTile, endTile) && !swapping)
+        if (!swapping)
         {
-            StartCoroutine(SwapTiles(startTile, endTile));
+            if (startTile != null && endTile != null && IsCloseTo(startTile, endTile) && !swapping)
+            {
+                StartCoroutine(SwapTiles(startTile, endTile));
+            }
+            startTile = null;
+            endTile = null;
         }
-        startTile = null;
-        endTile = null;
     }
 
     IEnumerator SwapTiles(Tile startTile, Tile endTile)
@@ -179,18 +187,25 @@ public class Board : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         List<Piece> newMatches = new List<Piece>();
-        collapsedPieces.ForEach(piece=>{
+        collapsedPieces.ForEach(piece =>
+        {
             var matches = GetMatchByPiece(piece.x, piece.y, 3);
-            if(matches != null)
+            if (matches != null)
             {
                 newMatches = newMatches.Union(matches).ToList();
                 ClearPieces(matches);
             }
         });
-        if(newMatches.Count > 0)
+        if (newMatches.Count > 0)
         {
             var newCollapsedPieces = CollapseColumns(GetColumns(newMatches), 0.3f);
             FindMatchRecursive(newCollapsedPieces);
+        }
+        else
+        {
+            yield return new WaitForSeconds(0.1f);
+            StartCoroutine(SetupPieces());
+            swapping = false;
         }
         yield return null;
     }
