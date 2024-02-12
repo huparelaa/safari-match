@@ -2,7 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-using UnityEditorInternal;
+#if UNITY_EDITOR
+    using UnityEditorInternal;
+    // Tu código que usa UnityEditorInternal va aquí
+#endif
 public class Piece : MonoBehaviour
 {
     public int x;
