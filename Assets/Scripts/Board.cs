@@ -16,6 +16,7 @@ public class Board : MonoBehaviour
     public float CameraSizeOffset;
     public float CameraVerticalOffset;
 
+    public int PointsPerMatch;
     public GameObject[] availablePieces;
 
     Tile[,] Tiles; //<-- 2D array of tiles
@@ -163,6 +164,7 @@ public class Board : MonoBehaviour
         else
         {
             ClearPieces(allMatches);
+            AwardPoints(allMatches);
         }
 
         startTile = null;
@@ -199,6 +201,7 @@ public class Board : MonoBehaviour
             {
                 newMatches = newMatches.Union(matches).ToList();
                 ClearPieces(matches);
+                AwardPoints(matches);
             }
         });
         if (newMatches.Count > 0)
@@ -351,4 +354,8 @@ public class Board : MonoBehaviour
         return downMatchs.Count > 0 || leftMatchs.Count > 0;
     }
 
+    public void AwardPoints(List<Piece> allMatches)
+    {
+        GameManager.instance.AddPoints(allMatches.Count * PointsPerMatch);
+    }
 }
