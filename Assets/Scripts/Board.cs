@@ -6,7 +6,7 @@ using System.Linq;
 
 public class Board : MonoBehaviour
 {
-    public float timeBetweenPieces = 0.01f;
+    public float timeBetweenPieces = 0.001f;
 
     public int width;
     public int height;
@@ -203,7 +203,7 @@ public class Board : MonoBehaviour
         });
         if (newMatches.Count > 0)
         {
-            var newCollapsedPieces = CollapseColumns(GetColumns(newMatches), 0.3f);
+            var newCollapsedPieces = CollapseColumns(GetColumns(newMatches), 0.001f);
             FindMatchRecursive(newCollapsedPieces);
         }
         else
