@@ -110,17 +110,17 @@ public class Board : MonoBehaviour
 
     public void TileDown(Tile tile_)
     {
-        if (!swapping) startTile = tile_;
+        if (!swapping && GameManager.instance.gameState==GameManager.GameState.Playing) startTile = tile_;
     }
 
     public void TileOver(Tile tile_)
     {
-        if (!swapping) endTile = tile_;
+        if (!swapping && GameManager.instance.gameState==GameManager.GameState.Playing) endTile = tile_;
     }
 
     public void TileUp(Tile tile_)
     {
-        if (!swapping)
+        if (!swapping && GameManager.instance.gameState==GameManager.GameState.Playing)
         {
             if (startTile != null && endTile != null && IsCloseTo(startTile, endTile) && !swapping)
             {

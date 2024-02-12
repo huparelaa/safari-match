@@ -7,6 +7,21 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
+    public int Points = 0;
+    public UnityEvent OnPointsUpdated;
+
+    public float timeToMatch = 10f;
+    public float currentTimeToMatch = 0f;
+
+    public enum GameState
+    {
+        Idle,
+        Playing,
+        GameOver
+    }
+
+    public GameState gameState;
+
     private void Awake()
     {
         if (instance == null)
@@ -19,13 +34,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public int Points = 0;
-    public UnityEvent OnPointsUpdated;
-
     public void AddPoints(int newPoints)
     {
         Points += newPoints;
         OnPointsUpdated.Invoke();
+        currentTimeToMatch = 0;
     }
 
 
@@ -34,8 +47,14 @@ public class GameManager : MonoBehaviour
 
     }
 
-    void Update()
+    private void Update()
     {
+        if(gameState == GameState.Playing){
+            currentTimeToMatch += Time.deltaTime;
+            if(currentTimeToMatch >= timeToMatch){
+                gameState = GameState.GameOver;
+            }
+        }
 
     }
 }
