@@ -59,4 +59,14 @@ public class GameManager : MonoBehaviour
         }
 
     }
+    public void RestartGame(){
+        Points = 0;
+        gameState = GameState.Playing;
+        OnGameStateUpdated.Invoke(gameState);
+        currentTimeToMatch = 0;
+    }
+
+    public void ExitGame(){
+        Application.Quit();
+    }
 }
