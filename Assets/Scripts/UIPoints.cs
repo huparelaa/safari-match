@@ -12,6 +12,22 @@ public class UIPoints : MonoBehaviour
     void Start()
     {
         GameManager.instance.OnPointsUpdated.AddListener(UpdatePoints);
+        GameManager.instance.OnGameStateUpdated.AddListener(GameStateUpdated);
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.instance.OnPointsUpdated.RemoveListener(UpdatePoints);
+        GameManager.instance.OnGameStateUpdated.RemoveListener(GameStateUpdated);
+    }
+
+    private void GameStateUpdated(GameManager.GameState newState)
+    {
+        if(newState == GameManager.GameState.GameOver)
+        {
+            displayedPoints = 0;
+            pointsLabel.text = "0";
+        }
     }
 
     // Update is called once per frame

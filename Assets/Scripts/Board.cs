@@ -34,7 +34,25 @@ public class Board : MonoBehaviour
         Pieces = new Piece[width, height];
         SetupBoard();
         PositionCamera();
-        StartCoroutine(SetupPieces());
+        if(GameManager.instance.gameState==GameManager.GameState.Playing){
+            StartCoroutine(SetupPieces());
+        }
+        GameManager.instance.OnGameStateUpdated.AddListener(OnGameStateUpdated);
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.instance.OnGameStateUpdated.RemoveListener(OnGameStateUpdated);
+    }
+
+    private void OnGameStateUpdated(GameManager.GameState newState)
+    {
+        if(newState==GameManager.GameState.Playing){
+            StartCoroutine(SetupPieces());
+        }
+        if(newState==GameManager.GameState.GameOver){
+            ClearBoard();
+        }
     }
 
     private void SetupBoard()
@@ -83,6 +101,17 @@ public class Board : MonoBehaviour
         var pieceToClear = Pieces[x, y];
         pieceToClear.Remove(true);
         Pieces[x, y] = null;
+    }
+
+    private void ClearBoard()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                ClearPieceAt(x, y);
+            }
+        }
     }
     private Piece CreatePieceAt(int x, int y)
     {
