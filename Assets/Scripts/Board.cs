@@ -166,6 +166,7 @@ public class Board : MonoBehaviour
         var startPiece = Pieces[startTile.x, startTile.y];
         var endPiece = Pieces[endTile.x, endTile.y];
 
+        AudioManager.instance.Move();
         startPiece.Move(endTile.x, endTile.y);
         endPiece.Move(startTile.x, startTile.y);
 
@@ -185,6 +186,7 @@ public class Board : MonoBehaviour
         });
         if (allMatches.Count == 0)
         {
+            AudioManager.instance.Miss();
             startPiece.Move(startTile.x, startTile.y);
             endPiece.Move(endTile.x, endTile.y);
             Pieces[startTile.x, startTile.y] = startPiece;
