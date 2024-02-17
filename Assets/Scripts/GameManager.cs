@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -66,7 +67,18 @@ public class GameManager : MonoBehaviour
         currentTimeToMatch = 0;
     }
 
-    public void ExitGame(){
-        Application.Quit();
+    public void StartGame()
+    {
+        gameState = GameState.Playing;
+        OnGameStateUpdated.Invoke(gameState);
+        currentTimeToMatch = 0;
+        Points = 0;
+    }
+
+    public void ExitGame()
+    {
+        Points = 0;
+        gameState = GameState.Idle;
+        OnGameStateUpdated.Invoke(gameState);
     }
 }
