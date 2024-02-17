@@ -9,3 +9,6 @@ Safari Match es un divertido juego móvil desarrollado para dispositivos Android
 
 > [!NOTE]
 > A la hora de instalar el APK se detectará que la aplicación es potencialmente peligrosa (Claramente no lo es) por lo que debes dar clic a la opción "Instalar de todas formas" o "Install anyway"
+
+---
+![image](https://github.com/huparelaa/Undertale_Mixer/assets/81880485/8943f00a-8437-4d06-8ab4-e105a90c70e6)
